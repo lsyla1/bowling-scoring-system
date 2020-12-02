@@ -7,9 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Andres Ortiz
  */
 @SpringBootApplication
-public class BowlingApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BowlingApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 }
