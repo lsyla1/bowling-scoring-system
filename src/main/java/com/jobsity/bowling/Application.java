@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author Andres Ortiz
+ * Senior Sofware Engineer
+ * andresortiz28@gmail.com
+ *
  */
 @SpringBootApplication
 public class Application {
