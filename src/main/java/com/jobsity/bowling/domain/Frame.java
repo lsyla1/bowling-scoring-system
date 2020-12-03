@@ -1,27 +1,28 @@
 package com.jobsity.bowling.domain;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Table(name = "frames")
 public class Frame extends BaseEntity {
 
     @Column(name = "number", nullable = false)
-    private int frameNumber;
+    private int number;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "frame")
-    private List<Roll> rolls;
+    @OneToMany(mappedBy = "frame", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @Fetch(FetchMode.SELECT)
+    private List<Roll> rolls = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "game_id"),
-            @JoinColumn(name = "player_id")
-    })
+    @JoinColumns({ @JoinColumn(name = "game_id"), @JoinColumn(name = "player_id") })
     private Score score;
 }

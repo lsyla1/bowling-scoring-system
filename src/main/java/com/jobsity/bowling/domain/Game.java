@@ -1,18 +1,17 @@
 package com.jobsity.bowling.domain;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Data
-@EqualsAndHashCode(callSuper = true)
-@Table (name = "games")
+@Getter
+@Setter
+@Table(name = "games")
 public class Game extends BaseEntity {
 
     @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
     private GameType type;
 }
