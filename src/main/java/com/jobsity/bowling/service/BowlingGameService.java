@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.jobsity.bowling.util.BowlingUtil.*;
+
 @Service
 public class BowlingGameService implements GameService<Integer> {
-
-    private final int LAST_FRAME = 10;
 
     @Autowired
     private GameRepository gameRepository;
@@ -109,23 +109,5 @@ public class BowlingGameService implements GameService<Integer> {
         } else {
             return totalRolls == 2;
         }
-    }
-
-    private boolean isStrike(Frame frame) {
-        List<Roll> rolls = frame.getRolls();
-        if (rolls.size() > 0) {
-            return rolls.get(0).getPins() == 10;
-        }
-        return false;
-    }
-
-    private boolean isSpare(Frame frame) {
-        List<Roll> rolls = frame.getRolls();
-        if (rolls.size() >= 2) {
-            int roll1 = rolls.get(0).getPins();
-            int roll2 = rolls.get(1).getPins();
-            return roll1 < 10 & roll1 + roll2 == 10;
-        }
-        return false;
     }
 }
