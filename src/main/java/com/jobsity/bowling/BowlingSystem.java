@@ -2,6 +2,7 @@ package com.jobsity.bowling;
 
 import com.jobsity.bowling.domain.*;
 import com.jobsity.bowling.service.GameService;
+import com.jobsity.bowling.service.ScoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,9 @@ public class BowlingSystem implements CommandLineRunner {
 
     @Autowired
     private GameService<Integer> gameService;
+
+    @Autowired
+    private ScoreService<String> scoreService;
 
     @Override
     public void run(String... args) {

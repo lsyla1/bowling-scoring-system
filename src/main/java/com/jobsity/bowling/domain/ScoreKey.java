@@ -1,6 +1,7 @@
 package com.jobsity.bowling.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
@@ -10,6 +11,7 @@ import java.io.Serializable;
 @Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class ScoreKey implements Serializable {
 
     @Column(name = "game_id")
