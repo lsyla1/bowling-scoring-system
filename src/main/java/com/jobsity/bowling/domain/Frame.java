@@ -25,4 +25,8 @@ public class Frame extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({ @JoinColumn(name = "game_id"), @JoinColumn(name = "player_id") })
     private Score score;
+
+    public void addRoll(Roll roll) {
+        rolls.add(roll);
+    }
 }

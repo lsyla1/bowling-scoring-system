@@ -124,7 +124,9 @@ public class BowlingSystem implements CommandLineRunner {
             if(gameService.isPlayerEnded(game, previousPlayer)) {
                 throw new FrameNumberException("The player " + previousPlayer.getName() + " has already finished the game");
             }
-            throw new PlayerOrderException("The player " + previousPlayer.getName() + " had already finished the turn");
+            if(players.size() > 1) {
+                throw new PlayerOrderException("The player " + previousPlayer.getName() + " had already finished the turn");
+            }
         }
     }
 

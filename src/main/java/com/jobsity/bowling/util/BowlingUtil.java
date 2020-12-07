@@ -35,7 +35,11 @@ public class BowlingUtil {
         if (isStrike(frame) || isSpare(frame)) {
             return frameNumber < LAST_FRAME || (frameNumber == LAST_FRAME && totalRolls == 3);
         } else {
-            return totalRolls == 2;
+            if(frameNumber < LAST_FRAME) {
+                return totalRolls == 2;
+            } else {
+                return totalRolls == 2 && getPinsOfTwoRolls(frame) < 10 || totalRolls == 3;
+            }
         }
     }
 
