@@ -1,8 +1,8 @@
 package com.jobsity.bowling.exception;
 
-public class IncompleteGameException extends Exception {
+public abstract class IncompleteGameException extends BowlingException {
 
-    public IncompleteGameException() {
-        super("The game is incomplete for some players");
+    public IncompleteGameException(String message) {
+        super("The game is incomplete. " + message);
     }
 }

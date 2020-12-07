@@ -1,8 +1,8 @@
 package com.jobsity.bowling.exception;
 
-public class IncorrectFormatException extends Exception{
+public class IncorrectFormatException extends BowlingException {
 
-    public IncorrectFormatException() {
-        super("The input data is incorrectly formatted");
+    public IncorrectFormatException(String message) {
+        super("The input data is incorrectly formatted: " + message);
     }
 }
