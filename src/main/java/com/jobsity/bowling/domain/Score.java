@@ -35,4 +35,15 @@ public class Score {
     @MapsId("playerId")
     @JoinColumn(name = "player_id")
     private Player player;
+
+    public void addFrame(Frame frame) {
+        frames.add(frame);
+    }
+
+    public Frame getLastFrame() {
+        if (!frames.isEmpty()) {
+            return frames.get(frames.size() - 1);
+        }
+        return null;
+    }
 }

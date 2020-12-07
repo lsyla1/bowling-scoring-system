@@ -68,8 +68,8 @@ public class BowlingGameService implements GameService<Integer> {
                 roll.setNumber(rolls.size() + 1);
                 roll.setPins(points);
                 roll.setFrame(frame);
-                frame.getRolls().add(roll);
-                score.getFrames().add(frame);
+                frame.addRoll(roll);
+                score.addFrame(frame);
 
                 if (frameNumber == LAST_FRAME && isFrameCompleted(frame)) {
                     score.setStatus(ScoreStatus.COMPLETED);
@@ -82,8 +82,7 @@ public class BowlingGameService implements GameService<Integer> {
     @Override
     public boolean isTurnEnded(Game game, Player player) {
         Score score = scoreRepository.findByGameAndPlayer(game, player);
-        List<Frame> frames = score.getFrames();
-        return isFrameCompleted(frames.get(frames.size() - 1));
+        return isFrameCompleted(score.getLastFrame());
     }
 
     @Override
@@ -96,9 +95,8 @@ public class BowlingGameService implements GameService<Integer> {
         Frame frame = new Frame();
         frame.setScore(score);
 
-        List<Frame> frames = score.getFrames();
-        if (!frames.isEmpty()) {
-            Frame currentFrame = frames.get(frames.size() - 1);
+        Frame currentFrame = score.getLastFrame();
+        if (Objects.nonNull(currentFrame)) {
             if (isFrameCompleted(currentFrame)) {
                 frame.setNumber(currentFrame.getNumber() + 1);
                 return frame;
