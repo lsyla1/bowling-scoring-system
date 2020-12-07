@@ -1,0 +1,14 @@
+package com.jobsity.bowling.service;
+
+import com.jobsity.bowling.domain.Game;
+import com.jobsity.bowling.domain.Player;
+import com.jobsity.bowling.exception.BowlingException;
+
+public interface GameService<T> {
+
+    Game addGame(Game game);
+    Player addPlayer(Game game, Player player);
+    void addPoints(Game game, Player player, T points) throws BowlingException;
+    boolean isTurnEnded(Game game, Player player);
+    boolean isPlayerEnded(Game game, Player player);
+}

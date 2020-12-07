@@ -1,13 +1,15 @@
 package com.jobsity.bowling.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
+@Builder
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "players")
 public class Player extends BaseEntity {
 

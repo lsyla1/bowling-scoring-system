@@ -14,8 +14,8 @@ public class Roll extends BaseEntity {
     @Column(name = "number", nullable = false)
     private int number;
 
-    @Column(name = "pinfalls", nullable = false)
-    private int pinfalls;
+    @Column(name = "pins", nullable = false)
+    private int pins;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "frame_id")
