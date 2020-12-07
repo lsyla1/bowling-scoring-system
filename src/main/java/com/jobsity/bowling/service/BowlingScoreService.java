@@ -38,15 +38,15 @@ public class BowlingScoreService implements ScoreService<String> {
                     if (frame.getNumber() < LAST_FRAME) {
                         status = TAB + "X";
                     } else {
-                        status = "X" + TAB + rolls.get(1).getPins();
+                        status = "X" + TAB + getValue(rolls.get(1).getPins());
                     }
                 } else if (isSpare(frame)) {
                     status = rolls.get(0).getPins() + TAB + "/";
                 } else {
-                    status = rolls.get(0).getPins() + TAB + rolls.get(1).getPins();
+                    status = rolls.get(0).getPins() + TAB + getValue(rolls.get(1).getPins());
                 }
                 if (rolls.size() == 3) {
-                    status += TAB + rolls.get(2).getPins();
+                    status += TAB + getValue(rolls.get(2).getPins());
                 }
                 list.add(status);
             });
@@ -107,5 +107,9 @@ public class BowlingScoreService implements ScoreService<String> {
 
     private Frame getNextFrame(Frame frame) {
         return frameRepository.findFrameByNumberAndScore(frame.getNumber() + 1, frame.getScore());
+    }
+
+    private String getValue(int pins) {
+        return pins == 10 ? "X" : String.valueOf(pins);
     }
 }

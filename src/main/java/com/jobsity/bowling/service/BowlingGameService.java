@@ -60,9 +60,9 @@ public class BowlingGameService implements GameService<Integer> {
             int frameNumber = frame.getNumber();
 
             List<Roll> rolls = frame.getRolls();
-            int totalPins = rolls.stream().mapToInt(Roll::getPins).sum();
-            if ((frameNumber < LAST_FRAME && points + totalPins > 10) || (frameNumber == LAST_FRAME && points + totalPins > 30)) {
-                throw new PinsException((points + totalPins) + " pines registered in the frame " + frameNumber + " by the player " + player.getName());
+            int pinsAllRolls = rolls.stream().mapToInt(Roll::getPins).sum();
+            if ((frameNumber < LAST_FRAME && points + pinsAllRolls > 10) || (frameNumber == LAST_FRAME && points + pinsAllRolls > 30)) {
+                throw new PinsException((points + pinsAllRolls) + " pines registered in the frame " + frameNumber + " by the player " + player.getName());
             } else {
                 Roll roll = new Roll();
                 roll.setNumber(rolls.size() + 1);
