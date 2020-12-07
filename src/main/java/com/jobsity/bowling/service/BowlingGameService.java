@@ -1,7 +1,7 @@
 package com.jobsity.bowling.service;
 
 import com.jobsity.bowling.domain.*;
-import com.jobsity.bowling.exception.FrameNumberException;
+import com.jobsity.bowling.exception.BowlingException;
 import com.jobsity.bowling.exception.InvalidScoreException;
 import com.jobsity.bowling.exception.PinsException;
 import com.jobsity.bowling.repository.GameRepository;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.jobsity.bowling.util.BowlingUtil.*;
@@ -28,34 +29,34 @@ public class BowlingGameService implements GameService<Integer> {
     private ScoreRepository scoreRepository;
 
     @Override
-    public void addGame(Game game) {
-        gameRepository.save(game);
+    public Game addGame(Game game) {
+        return gameRepository.save(game);
     }
 
     @Override
-    public void addPlayer(Player player) {
-        playerRepository.save(player);
-    }
-
-    @Override
-    public void addPlayerToGame(Game game, Player player) {
+    public Player addPlayer(Game game, Player player) {
+        Player rPlayer = playerRepository.findPlayerByName(player.getName());
+        if (Objects.isNull(rPlayer)) {
+            rPlayer = playerRepository.save(player);
+        }
         Score score = new Score();
-        score.setId(new ScoreKey(game.getId(), player.getId()));
+        score.setId(new ScoreKey(game.getId(), rPlayer.getId()));
         score.setStatus(ScoreStatus.INCOMPLETE);
         score.setGame(game);
-        score.setPlayer(player);
+        score.setPlayer(rPlayer);
         scoreRepository.save(score);
+        return rPlayer;
     }
 
     @Override
-    public void addPoints(Game game, Player player, Integer points) throws Exception {
+    public void addPoints(Game game, Player player, Integer points) throws BowlingException {
         if (points < 0 || points > 10) {
             throw new InvalidScoreException(points + " pins registered in a throw by the player " + player.getName());
         }
         Optional<Score> scoreOptional = scoreRepository.findById(new ScoreKey(game.getId(), player.getId()));
         if (scoreOptional.isPresent()) {
             Score score = scoreOptional.get();
-            Frame frame = getFrame(score);
+            Frame frame = getFrameToUse(score);
             int frameNumber = frame.getNumber();
 
             List<Roll> rolls = frame.getRolls();
@@ -78,7 +79,20 @@ public class BowlingGameService implements GameService<Integer> {
         }
     }
 
-    private Frame getFrame(Score score) throws Exception {
+    @Override
+    public boolean isTurnEnded(Game game, Player player) {
+        Score score = scoreRepository.findByGameAndPlayer(game, player);
+        List<Frame> frames = score.getFrames();
+        return isFrameCompleted(frames.get(frames.size() - 1));
+    }
+
+    @Override
+    public boolean isPlayerEnded(Game game, Player player) {
+        Score score = scoreRepository.findByGameAndPlayer(game, player);
+        return score.getStatus() == ScoreStatus.COMPLETED;
+    }
+
+    private Frame getFrameToUse(Score score) {
         Frame frame = new Frame();
         frame.setScore(score);
 
@@ -86,28 +100,14 @@ public class BowlingGameService implements GameService<Integer> {
         if (!frames.isEmpty()) {
             Frame currentFrame = frames.get(frames.size() - 1);
             if (isFrameCompleted(currentFrame)) {
-                if (currentFrame.getNumber() == LAST_FRAME) {
-                    throw new FrameNumberException();
-                } else {
-                    frame.setNumber(currentFrame.getNumber() + 1);
-                    return frame;
-                }
+                frame.setNumber(currentFrame.getNumber() + 1);
+                return frame;
             } else {
                 return currentFrame;
             }
         } else {
             frame.setNumber(1);
             return frame;
-        }
-    }
-
-    private boolean isFrameCompleted(Frame frame) {
-        int frameNumber = frame.getNumber();
-        int totalRolls = frame.getRolls().size();
-        if (isStrike(frame) || isSpare(frame)) {
-            return frameNumber < LAST_FRAME || (frameNumber == LAST_FRAME && totalRolls == 3);
-        } else {
-            return totalRolls == 2;
         }
     }
 }

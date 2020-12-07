@@ -1,6 +1,7 @@
 package com.jobsity.bowling.service;
 
 import com.jobsity.bowling.domain.*;
+import com.jobsity.bowling.exception.BowlingException;
 import com.jobsity.bowling.exception.IncompleteScoreException;
 import com.jobsity.bowling.repository.FrameRepository;
 import com.jobsity.bowling.repository.ScoreRepository;
@@ -22,12 +23,10 @@ public class BowlingScoreService implements ScoreService<String> {
     private FrameRepository frameRepository;
 
     @Override
-    public List<String> getStatusPerFrame(Game game, Player player) throws Exception {
+    public List<String> getPinfallsPerFrame(Score score) throws BowlingException {
         List<String> list = new ArrayList<>();
-        Optional<Score> scoreOpt = scoreRepository.findById(new ScoreKey(game.getId(), player.getId()));
-        if (scoreOpt.isPresent()) {
-            checkScore(scoreOpt.get());
-            List<Frame> frames = scoreOpt.get().getFrames().stream()
+        if (score.getStatus() == ScoreStatus.COMPLETED) {
+            List<Frame> frames = score.getFrames().stream()
                     .sorted(Comparator.comparing(Frame::getNumber))
                     .collect(Collectors.toList());
 
@@ -51,17 +50,18 @@ public class BowlingScoreService implements ScoreService<String> {
                 }
                 list.add(status);
             });
+        } else {
+            throw new IncompleteScoreException("The player " + score.getPlayer().getName()
+                    + " has not made all the throws. Current frame: " + score.getFrames().size());
         }
         return list;
     }
 
     @Override
-    public List<String> getScoresPerFrame(Game game, Player player) throws Exception {
+    public List<String> getScoresPerFrame(Score score) throws BowlingException {
         List<String> list = new ArrayList<>();
-        Optional<Score> scoreOpt = scoreRepository.findById(new ScoreKey(game.getId(), player.getId()));
-        if (scoreOpt.isPresent()) {
-            checkScore(scoreOpt.get());
-            List<Frame> frames = scoreOpt.get().getFrames().stream()
+        if (score.getStatus() == ScoreStatus.COMPLETED) {
+            List<Frame> frames = score.getFrames().stream()
                     .sorted(Comparator.comparing(Frame::getNumber))
                     .collect(Collectors.toList());
 
@@ -70,15 +70,16 @@ public class BowlingScoreService implements ScoreService<String> {
                 sum += getPureScore(frame) + getBonus(frame);
                 list.add(String.valueOf(sum));
             }
+        } else {
+            throw new IncompleteScoreException("The player " + score.getPlayer().getName()
+                    + " has not made all the throws. Current frame: " + score.getFrames().size());
         }
         return list;
     }
 
-    private void checkScore(Score score) throws Exception {
-        if (score.getStatus() == ScoreStatus.INCOMPLETE) {
-            throw new IncompleteScoreException("The player " + score.getPlayer().getName()
-                    + " has not made all the throws. Current frame: " + score.getFrames().size());
-        }
+    @Override
+    public List<Score> getScoresByGame(Game game) {
+        return scoreRepository.findAllByGame(game);
     }
 
     private int getBonus(Frame frame) {

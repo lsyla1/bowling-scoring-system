@@ -29,6 +29,16 @@ public class BowlingUtil {
         return false;
     }
 
+    public static boolean isFrameCompleted(Frame frame) {
+        int frameNumber = frame.getNumber();
+        int totalRolls = frame.getRolls().size();
+        if (isStrike(frame) || isSpare(frame)) {
+            return frameNumber < LAST_FRAME || (frameNumber == LAST_FRAME && totalRolls == 3);
+        } else {
+            return totalRolls == 2;
+        }
+    }
+
     public static int getPureScore(Frame frame) {
         return frame.getRolls().stream()
                 .mapToInt(Roll::getPins)
