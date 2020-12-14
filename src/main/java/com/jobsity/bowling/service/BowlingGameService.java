@@ -13,13 +13,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.jobsity.bowling.util.BowlingUtil.*;
 
 @Service
-public class BowlingGameService implements GameService<Integer> {
+public class BowlingGameService implements GameService {
 
     @Autowired
     private GameRepository gameRepository;
@@ -51,8 +49,9 @@ public class BowlingGameService implements GameService<Integer> {
     }
 
     @Override
-    public void addPoints(Game game, Player player, Integer points) throws BowlingException {
-        if (points < 0 || points > 10) {
+    public void addPoints(Game game, Player player, String points) throws BowlingException {
+        int pins = points.equals("F") ? 0 : Integer.parseInt(points);
+        if (pins < 0 || pins > 10) {
             throw new InvalidScoreException(points + " pins registered in a throw by the player " + player.getName());
         }
         Optional<Score> scoreOptional = scoreRepository.findById(new ScoreKey(game.getId(), player.getId()));
@@ -62,9 +61,9 @@ public class BowlingGameService implements GameService<Integer> {
             int frameNumber = frame.getNumber();
 
             List<Roll> rolls = frame.getRolls();
-            int pinsAllRolls = rolls.stream().mapToInt(Roll::getPins).sum();
-            if ((frameNumber < LAST_FRAME && points + pinsAllRolls > 10) || (frameNumber == LAST_FRAME && points + pinsAllRolls > 30)) {
-                throw new PinsException((points + pinsAllRolls) + " pines registered in the frame " + frameNumber + " by the player " + player.getName());
+            int pinsAllRolls = rolls.stream().mapToInt(Roll::getPinsNumber).sum();
+            if ((frameNumber < LAST_FRAME && pins + pinsAllRolls > 10) || (frameNumber == LAST_FRAME && pins + pinsAllRolls > 30)) {
+                throw new PinsException((pins + pinsAllRolls) + " pins registered in the frame " + frameNumber + " by the player " + player.getName());
             } else {
                 Roll roll = new Roll();
                 roll.setNumber(rolls.size() + 1);

@@ -15,9 +15,13 @@ public class Roll extends BaseEntity {
     private int number;
 
     @Column(name = "pins", nullable = false)
-    private int pins;
+    private String pins;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "frame_id")
     private Frame frame;
+
+    public int getPinsNumber() {
+        return pins.equals("F") ? 0 : Integer.parseInt(pins);
+    }
 }

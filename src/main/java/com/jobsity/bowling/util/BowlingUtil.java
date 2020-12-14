@@ -14,7 +14,7 @@ public class BowlingUtil {
     public static boolean isStrike(Frame frame) {
         List<Roll> rolls = frame.getRolls();
         if (rolls.size() > 0) {
-            return rolls.get(0).getPins() == 10;
+            return rolls.get(0).getPinsNumber() == 10;
         }
         return false;
     }
@@ -22,8 +22,8 @@ public class BowlingUtil {
     public static boolean isSpare(Frame frame) {
         List<Roll> rolls = frame.getRolls();
         if (rolls.size() >= 2) {
-            int roll1 = rolls.get(0).getPins();
-            int roll2 = rolls.get(1).getPins();
+            int roll1 = rolls.get(0).getPinsNumber();
+            int roll2 = rolls.get(1).getPinsNumber();
             return roll1 < 10 & roll1 + roll2 == 10;
         }
         return false;
@@ -45,14 +45,14 @@ public class BowlingUtil {
 
     public static int getPureScore(Frame frame) {
         return frame.getRolls().stream()
-                .mapToInt(Roll::getPins)
+                .mapToInt(Roll::getPinsNumber)
                 .sum();
     }
 
     public static int getPinsOfTwoRolls(Frame frame) {
         return frame.getRolls().stream()
                 .limit(2)
-                .mapToInt(Roll::getPins)
+                .mapToInt(Roll::getPinsNumber)
                 .sum();
     }
 }

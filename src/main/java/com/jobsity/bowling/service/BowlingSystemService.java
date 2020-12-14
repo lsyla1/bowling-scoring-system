@@ -1,13 +1,10 @@
-package com.jobsity.bowling;
+package com.jobsity.bowling.service;
 
 import com.jobsity.bowling.domain.*;
 import com.jobsity.bowling.exception.*;
-import com.jobsity.bowling.service.GameService;
-import com.jobsity.bowling.service.ScoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,12 +13,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
-@Slf4j
-public class BowlingSystem implements CommandLineRunner {
+@Service
+public class BowlingSystemService implements SystemService {
 
     @Autowired
-    private GameService<Integer> gameService;
+    private GameService gameService;
 
     @Autowired
     private ScoreService<String> scoreService;
@@ -35,25 +31,8 @@ public class BowlingSystem implements CommandLineRunner {
     private boolean orderFound;
 
     @Override
-    public void run(String... args) {
-        log.info("Bowling Scoring System Initialized!");
-        try {
-            if (args.length == 0) {
-                log.error("The path of the game file to process is missing!");
-            } else {
-                String results = processGame(args[0]);
-                log.info("\n\n" + results);
-            }
-        } catch (BowlingException | IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        System.exit(0);
-    }
-
-    private String processGame(String filePath) throws BowlingException, IOException {
-        Path path = Paths.get(filePath);
-        log.info("Game Path: " + path);
-        List<String> lines = Files.lines(path).collect(Collectors.toList());
+    public String processGame(String filePath) throws BowlingException, IOException {
+        List<String> lines = Files.lines(Paths.get(filePath)).collect(Collectors.toList());
         game = gameService.addGame(Game.builder().type(GameType.TEN_PIN_BOWLING).build());
         players = new LinkedList<>();
 
@@ -61,8 +40,7 @@ public class BowlingSystem implements CommandLineRunner {
             validateFormat(line);
             String[] data = line.split(" ");
             Player player = Player.builder().name(data[0]).build();
-            int points = data[1].equals("F") ? 0 : Integer.parseInt(data[1]);
-            addPoints(player, points);
+            addPoints(player, data[1]);
         }
         return scoreService.getResults(game);
     }
@@ -73,7 +51,7 @@ public class BowlingSystem implements CommandLineRunner {
         return player;
     }
 
-    private void addPoints(Player player, int points) throws BowlingException {
+    private void addPoints(Player player, String points) throws BowlingException {
         if (players.isEmpty()) {
             Player currentPlayer = addPlayer(player);
             previousPlayer = currentPlayer;
