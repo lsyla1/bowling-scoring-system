@@ -119,6 +119,6 @@ class BowlingGameServiceTest {
         when(scoreRepository.findByGameAndPlayer(any(Game.class), any(Player.class)))
                 .thenReturn(score);
 
-        assertTrue(gameService.isTurnEnded(game, player));
+        assertTrue(gameService.isFrameFinished(game, player));
     }
 }

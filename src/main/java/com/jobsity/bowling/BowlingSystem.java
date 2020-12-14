@@ -6,28 +6,19 @@ import com.jobsity.bowling.service.GameService;
 import com.jobsity.bowling.service.ScoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static com.jobsity.bowling.util.BowlingUtil.TAB;
-import static com.jobsity.bowling.util.BowlingUtil.DOUBLE_TAB;
 
 @Component
 @Slf4j
 public class BowlingSystem implements CommandLineRunner {
-
-    @Value("${game.file.path}")
-    private String gameFilePath;
 
     @Autowired
     private GameService<Integer> gameService;
@@ -41,65 +32,78 @@ public class BowlingSystem implements CommandLineRunner {
 
     private Player previousPlayer;
 
+    private boolean orderFound;
+
     @Override
     public void run(String... args) {
+        log.info("Bowling Scoring System Initialized!");
         try {
-            log.info("Bowling Scoring System Initialized");
-            Path path = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource(gameFilePath)).toURI());
-            log.info("Game File Path: " + path);
-            List<String> lines = Files.lines(path).collect(Collectors.toList());
-            game = gameService.addGame(Game.builder().type(GameType.TEN_PIN_BOWLING).build());
-            players = new LinkedList<>();
-
-            boolean establishedOrder = false;
-            for (String line : lines) {
-                validateFormat(line);
-                String[] data = line.split(" ");
-                Player player = Player.builder().name(data[0]).build();
-                int points = data[1].equals("F") ? 0 : Integer.parseInt(data[1]);
-
-                if (players.isEmpty()) {
-                    Player currentPlayer = addPlayer(player);
-                    gameService.addPoints(game, currentPlayer, points);
-                } else {
-                    validateOrder(player);
-                    Player queuePlayer = Optional.ofNullable(players.peek()).orElse(Player.builder().name("").build());
-                    if (!establishedOrder) {
-                        if (!player.getName().equals(queuePlayer.getName())) {
-                            Player currentPlayer = player.getName().equals(previousPlayer.getName()) ? previousPlayer : addPlayer(player);
-                            gameService.addPoints(game, currentPlayer, points);
-                        } else {
-                            establishedOrder = true;
-                        }
-                    }
-                    if (establishedOrder) {
-                        if (!player.getName().equals(queuePlayer.getName())) {
-                            throw new PlayerOrderException("The turn was for " + queuePlayer.getName());
-                        }
-                        gameService.addPoints(game, queuePlayer, points);
-                        adjustOrder(queuePlayer);
-                        previousPlayer = queuePlayer;
-                    }
-                }
+            if (args.length == 0) {
+                log.error("The path of the game file to process is missing!");
+            } else {
+                String results = processGame(args[0]);
+                log.info("\n\n" + results);
             }
-            printScores();
-        } catch (URISyntaxException | IOException | BowlingException e) {
+        } catch (BowlingException | IOException e) {
             log.error(e.getMessage(), e);
         }
         System.exit(0);
     }
 
+    private String processGame(String filePath) throws BowlingException, IOException {
+        Path path = Paths.get(filePath);
+        log.info("Game Path: " + path);
+        List<String> lines = Files.lines(path).collect(Collectors.toList());
+        game = gameService.addGame(Game.builder().type(GameType.TEN_PIN_BOWLING).build());
+        players = new LinkedList<>();
+
+        for (String line : lines) {
+            validateFormat(line);
+            String[] data = line.split(" ");
+            Player player = Player.builder().name(data[0]).build();
+            int points = data[1].equals("F") ? 0 : Integer.parseInt(data[1]);
+            addPoints(player, points);
+        }
+        return scoreService.getResults(game);
+    }
+
     private Player addPlayer(Player newPlayer) {
         Player player = gameService.addPlayer(game, newPlayer);
         players.add(player);
-        previousPlayer = player;
         return player;
     }
 
-    private void adjustOrder(Player player) {
-        if (gameService.isTurnEnded(game, player)) {
-            player = players.poll();
-            players.add(player);
+    private void addPoints(Player player, int points) throws BowlingException {
+        if (players.isEmpty()) {
+            Player currentPlayer = addPlayer(player);
+            previousPlayer = currentPlayer;
+            gameService.addPoints(game, currentPlayer, points);
+        } else {
+            validateOrder(player);
+            Player queuePlayer = players.peek();
+            if (!orderFound) {
+                if (!player.getName().equals(queuePlayer.getName())) {
+                    Player currentPlayer = previousPlayer;
+                    if (!player.getName().equals(previousPlayer.getName())) {
+                        currentPlayer = addPlayer(player);
+                        previousPlayer = currentPlayer;
+                    }
+                    gameService.addPoints(game, currentPlayer, points);
+                } else {
+                    orderFound = true;
+                }
+            }
+            if (orderFound) {
+                if (!player.getName().equals(queuePlayer.getName())) {
+                    throw new PlayerOrderException("The turn was for " + queuePlayer.getName());
+                }
+                gameService.addPoints(game, queuePlayer, points);
+                if (gameService.isFrameFinished(game, queuePlayer)) {
+                    players.remove();
+                    players.add(queuePlayer);
+                }
+                previousPlayer = queuePlayer;
+            }
         }
     }
 
@@ -117,33 +121,16 @@ public class BowlingSystem implements CommandLineRunner {
     }
 
     private void validateOrder(Player player) throws BowlingException {
-        if (!player.getName().equals(previousPlayer.getName()) && !gameService.isTurnEnded(game, previousPlayer)) {
+        if (!player.getName().equals(previousPlayer.getName()) && !gameService.isFrameFinished(game, previousPlayer)) {
             throw new PlayerOrderException("It is still the turn of the player " + previousPlayer.getName());
         }
-        if (player.getName().equals(previousPlayer.getName()) && gameService.isTurnEnded(game, previousPlayer)) {
-            if(gameService.isPlayerEnded(game, previousPlayer)) {
+        if (player.getName().equals(previousPlayer.getName()) && gameService.isFrameFinished(game, previousPlayer)) {
+            if (gameService.isGameFinished(game, previousPlayer)) {
                 throw new FrameNumberException("The player " + previousPlayer.getName() + " has already finished the game");
             }
-            if(players.size() > 1) {
+            if (players.size() > 1) {
                 throw new PlayerOrderException("The player " + previousPlayer.getName() + " had already finished the turn");
             }
         }
-    }
-
-    private void printScores() throws BowlingException {
-        List<String> numbers = IntStream.rangeClosed(1, 10).mapToObj(String::valueOf).collect(Collectors.toList());
-        StringBuilder result = new StringBuilder();
-        result.append("\nFrame").append(DOUBLE_TAB).append(String.join(DOUBLE_TAB, numbers)).append("\n");
-
-        List<Score> scores = scoreService.getScoresByGame(game);
-        for (Score score : scores) {
-            List<String> playerPinfalls = scoreService.getPinfallsPerFrame(score);
-            List<String> playerScores = scoreService.getScoresPerFrame(score);
-
-            result.append(score.getPlayer().getName()).append("\n");
-            result.append("Pinfalls").append(TAB).append(String.join(TAB, playerPinfalls)).append("\n");
-            result.append("Score").append(DOUBLE_TAB).append(String.join(DOUBLE_TAB, playerScores)).append("\n");
-        }
-        System.out.println(result.toString());
     }
 }

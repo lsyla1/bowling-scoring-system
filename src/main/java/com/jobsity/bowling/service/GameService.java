@@ -9,6 +9,6 @@ public interface GameService<T> {
     Game addGame(Game game);
     Player addPlayer(Game game, Player player);
     void addPoints(Game game, Player player, T points) throws BowlingException;
-    boolean isTurnEnded(Game game, Player player);
-    boolean isPlayerEnded(Game game, Player player);
+    boolean isFrameFinished(Game game, Player player);
+    boolean isGameFinished(Game game, Player player);
 }

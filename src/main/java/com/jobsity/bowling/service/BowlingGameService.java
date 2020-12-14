@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.jobsity.bowling.util.BowlingUtil.*;
 
@@ -80,13 +82,13 @@ public class BowlingGameService implements GameService<Integer> {
     }
 
     @Override
-    public boolean isTurnEnded(Game game, Player player) {
+    public boolean isFrameFinished(Game game, Player player) {
         Score score = scoreRepository.findByGameAndPlayer(game, player);
         return isFrameCompleted(score.getLastFrame());
     }
 
     @Override
-    public boolean isPlayerEnded(Game game, Player player) {
+    public boolean isGameFinished(Game game, Player player) {
         Score score = scoreRepository.findByGameAndPlayer(game, player);
         return score.getStatus() == ScoreStatus.COMPLETED;
     }
