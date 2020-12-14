@@ -41,19 +41,19 @@ class BowlingScoreServiceTest {
         score.setId(new ScoreKey(game.getId(), player.getId()));
         score.setStatus(ScoreStatus.COMPLETED);
 
-        addFrameWithRolls(1, new int[]{10});
-        addFrameWithRolls(2, new int[]{7, 3});
-        addFrameWithRolls(3, new int[]{9, 0});
-        addFrameWithRolls(4, new int[]{10});
-        addFrameWithRolls(5, new int[]{0, 8});
-        addFrameWithRolls(6, new int[]{8, 2});
-        addFrameWithRolls(7, new int[]{0, 6});
-        addFrameWithRolls(8, new int[]{10});
-        addFrameWithRolls(9, new int[]{10});
-        addFrameWithRolls(10, new int[]{10, 8, 1});
+        addFrameWithRolls(1, new String[]{"10"});
+        addFrameWithRolls(2, new String[]{"7", "3"});
+        addFrameWithRolls(3, new String[]{"9", "0"});
+        addFrameWithRolls(4, new String[]{"10"});
+        addFrameWithRolls(5, new String[]{"0", "8"});
+        addFrameWithRolls(6, new String[]{"8", "2"});
+        addFrameWithRolls(7, new String[]{"F", "6"});
+        addFrameWithRolls(8, new String[]{"10"});
+        addFrameWithRolls(9, new String[]{"10"});
+        addFrameWithRolls(10, new String[]{"10", "8", "1"});
     }
 
-    void addFrameWithRolls(int frameNumber, int[] pins) {
+    void addFrameWithRolls(int frameNumber, String[] pins) {
         Frame frame = new Frame();
         frame.setNumber(frameNumber);
 
@@ -75,7 +75,7 @@ class BowlingScoreServiceTest {
         list.add("\tX");
         list.add("0\t8");
         list.add("8\t/");
-        list.add("0\t6");
+        list.add("F\t6");
         list.add("\tX");
         list.add("\tX");
         list.add("X\t8\t1");
