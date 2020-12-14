@@ -16,7 +16,7 @@ class BowlingUtilTest {
         frame = new Frame();
     }
 
-    void addRollToFrame(int pins) {
+    void addRollToFrame(String pins) {
         Roll roll = new Roll();
         roll.setPins(pins);
         frame.addRoll(roll);
@@ -24,78 +24,78 @@ class BowlingUtilTest {
 
     @Test
     void isStrike() {
-        addRollToFrame(10);
+        addRollToFrame("10");
         assertTrue(BowlingUtil.isStrike(frame));
     }
 
     @Test
     void isSpare() {
-        addRollToFrame(2);
-        addRollToFrame(8);
+        addRollToFrame("2");
+        addRollToFrame("8");
         assertTrue(BowlingUtil.isSpare(frame));
     }
 
     @Test
     void isFrameCompletedAsNormal() {
         frame.setNumber(1);
-        addRollToFrame(4);
-        addRollToFrame(4);
+        addRollToFrame("4");
+        addRollToFrame("4");
         assertTrue(BowlingUtil.isFrameCompleted(frame));
     }
 
     @Test
     void isFrameCompletedAsNormalAsStrike() {
         frame.setNumber(1);
-        addRollToFrame(10);
+        addRollToFrame("10");
         assertTrue(BowlingUtil.isFrameCompleted(frame));
     }
 
     @Test
     void isFrameCompletedAsNormalAsSpare() {
         frame.setNumber(1);
-        addRollToFrame(4);
-        addRollToFrame(6);
+        addRollToFrame("4");
+        addRollToFrame("6");
         assertTrue(BowlingUtil.isFrameCompleted(frame));
     }
 
     @Test
     void isFrameCompletedAsTenth() {
         frame.setNumber(10);
-        addRollToFrame(4);
-        addRollToFrame(4);
+        addRollToFrame("4");
+        addRollToFrame("4");
         assertTrue(BowlingUtil.isFrameCompleted(frame));
     }
 
     @Test
     void isFrameCompletedAsTenthAsStrike() {
         frame.setNumber(10);
-        addRollToFrame(10);
-        addRollToFrame(5);
-        addRollToFrame(1);
+        addRollToFrame("10");
+        addRollToFrame("5");
+        addRollToFrame("1");
         assertTrue(BowlingUtil.isFrameCompleted(frame));
     }
 
     @Test
     void isFrameCompletedAsTenthAsSpare() {
         frame.setNumber(10);
-        addRollToFrame(4);
-        addRollToFrame(6);
-        addRollToFrame(1);
+        addRollToFrame("4");
+        addRollToFrame("6");
+        addRollToFrame("1");
         assertTrue(BowlingUtil.isFrameCompleted(frame));
     }
 
     @Test
     void getPureScore() {
-        addRollToFrame(4);
-        addRollToFrame(5);
+        addRollToFrame("4");
+        addRollToFrame("5");
         assertEquals(BowlingUtil.getPureScore(frame), 9);
     }
 
     @Test
     void getPinsOfTwoRolls() {
-        addRollToFrame(4);
-        addRollToFrame(3);
-        addRollToFrame(1);
+        addRollToFrame("4");
+        addRollToFrame("3");
+        addRollToFrame("1");
         assertEquals(BowlingUtil.getPinsOfTwoRolls(frame), 7);
     }
 }

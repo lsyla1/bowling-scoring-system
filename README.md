@@ -16,7 +16,7 @@ git clone https://github.com/andresort28/bowling-scoring-system.git
 ```
 
 ### Sample cases
-The default case is load from the resource path. However you can load any test case as default, just copy and paste the content from any game#.txt into the file game.txt and run the project again
+There is 6 samples cases to test. However the application receives a file path as an argument to process any TXT file with a Bowling game information.
 ```sh
 default case = src/main/java/resources/game.txt
 test cases = src/test/java/resources/game#.txt
@@ -29,9 +29,10 @@ mvn clean test
 ```
 
 ### Run the project
-Just open a terminal on the root of the project and execute the command:
+Compile the project and then run it from any terminal given the jar path and the game file path. Just execute the following commands:
 ```sh
-mvn spring-boot:run
+mvn package
+java -jar path/to/file.jar path/to/game.txt
 ```
 
 ## Contribute

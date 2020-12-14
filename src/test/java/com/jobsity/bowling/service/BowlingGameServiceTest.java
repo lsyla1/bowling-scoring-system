@@ -53,7 +53,7 @@ class BowlingGameServiceTest {
 
         List<Roll> rolls = new ArrayList<>();
         Roll roll = new Roll();
-        roll.setPins(9);
+        roll.setPins("9");
         rolls.add(roll);
 
         List<Frame> frames = new ArrayList<>();
@@ -89,7 +89,7 @@ class BowlingGameServiceTest {
 
     @Test
     void ThrownInvalidScoreExceptionWhenAddNegativePoints() {
-        int pins = -1;
+        String pins = "-1";
         Exception exception = assertThrows(InvalidScoreException.class, () -> gameService.addPoints(game, player, pins));
 
         String expectedMessage = pins + " pins registered in a throw by the player " + player.getName();
@@ -101,16 +101,17 @@ class BowlingGameServiceTest {
         when(scoreRepository.findById(any(ScoreKey.class)))
                 .thenReturn(Optional.of(score));
 
-        Exception exception = assertThrows(PinsException.class, () -> gameService.addPoints(game, player, 2));
+        Exception exception = assertThrows(PinsException.class, () -> gameService.addPoints(game, player, "2"));
 
-        String expectedMessage = "11 pines registered in the frame 2 by the player " + player.getName();
+        String expectedMessage = "11 pins registered in the frame 2 by the player " + player.getName();
         assertTrue(exception.getMessage().contains(expectedMessage));
     }
 
     @Test
     void hasPlayerFinishedTurn() {
         Roll roll = new Roll();
-        roll.setPins(1);
+        roll.setPins("1");
+
         List<Frame> frames = score.getFrames();
         Frame frame = frames.get(frames.size()-1);
         frame.addRoll(roll);
@@ -119,6 +120,6 @@ class BowlingGameServiceTest {
         when(scoreRepository.findByGameAndPlayer(any(Game.class), any(Player.class)))
                 .thenReturn(score);
 
-        assertTrue(gameService.isTurnEnded(game, player));
+        assertTrue(gameService.isFrameFinished(game, player));
     }
 }

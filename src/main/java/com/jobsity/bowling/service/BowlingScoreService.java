@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.jobsity.bowling.util.BowlingUtil.*;
 
@@ -82,6 +83,24 @@ public class BowlingScoreService implements ScoreService<String> {
         return scoreRepository.findAllByGame(game);
     }
 
+    @Override
+    public String getResults(Game game) throws BowlingException {
+        List<String> numbers = IntStream.rangeClosed(1, 10).mapToObj(String::valueOf).collect(Collectors.toList());
+        StringBuilder result = new StringBuilder();
+        result.append("Frame").append(DOUBLE_TAB).append(String.join(DOUBLE_TAB, numbers)).append("\n");
+
+        List<Score> scores = getScoresByGame(game);
+        for (Score score : scores) {
+            List<String> playerPinfalls = getPinfallsPerFrame(score);
+            List<String> playerScores = getScoresPerFrame(score);
+
+            result.append(score.getPlayer().getName()).append("\n");
+            result.append("Pinfalls").append(TAB).append(String.join(TAB, playerPinfalls)).append("\n");
+            result.append("Score").append(DOUBLE_TAB).append(String.join(DOUBLE_TAB, playerScores)).append("\n");
+        }
+        return result.toString();
+    }
+
     private int getBonus(Frame frame) {
         int bonus = 0;
         if (frame.getNumber() < LAST_FRAME) {
@@ -91,7 +110,7 @@ public class BowlingScoreService implements ScoreService<String> {
                     if (nextFrame.getNumber() < LAST_FRAME) {
                         bonus += 10;
                         nextFrame = getNextFrame(nextFrame);
-                        bonus += nextFrame.getRolls().get(0).getPins();
+                        bonus += nextFrame.getRolls().get(0).getPinsNumber();
                     } else {
                         bonus += getPinsOfTwoRolls(nextFrame);
                     }
@@ -99,7 +118,7 @@ public class BowlingScoreService implements ScoreService<String> {
                     bonus += getPinsOfTwoRolls(nextFrame);
                 }
             } else if (isSpare(frame)) {
-                bonus += getNextFrame(frame).getRolls().get(0).getPins();
+                bonus += getNextFrame(frame).getRolls().get(0).getPinsNumber();
             }
         }
         return bonus;
@@ -109,7 +128,7 @@ public class BowlingScoreService implements ScoreService<String> {
         return frameRepository.findFrameByNumberAndScore(frame.getNumber() + 1, frame.getScore());
     }
 
-    private String getValue(int pins) {
-        return pins == 10 ? "X" : String.valueOf(pins);
+    private String getValue(String pins) {
+        return pins.equals("10") ? "X" : pins;
     }
 }
